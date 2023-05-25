@@ -58,18 +58,24 @@ class _ContactManagementState extends State<ContactManagement> {
                 backgroundColor: MaterialStatePropertyAll<Color>(Colors.indigo),
               ),
               onPressed: () async {
-                int id = await _addContact();
-                if (id != 0) {
-                  _txtContactName.clear();
-                  _txtContactPhone.clear();
-                  Navigator.of(context).popAndPushNamed('/');
-                  isError = false;
-                } else {
+                await _addContact().then((value) {
+                  if (value != 0) {
+                    _txtContactName.clear();
+                    _txtContactPhone.clear();
+                    Navigator.of(context).popAndPushNamed('/');
+                    isError = false;
+                  } else {
+                    setState(() {
+                      errorText = "Wrong";
+                      isError = true;
+                    });
+                  }
+                }).catchError((err) {
                   setState(() {
-                    errorText = "Wrong";
+                    errorText = err;
                     isError = true;
                   });
-                }
+                });
               },
               child: const Text(
                 'Create',

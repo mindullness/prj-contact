@@ -19,6 +19,7 @@ class _ContactsListState extends State<ContactsList> {
   }
 
   void _refreshState() async {
+    setState(() {});
     await DBRepository.instance
         .getAllContacts()
         .then((value) => {setState(() => _contacts = value)});
@@ -46,8 +47,8 @@ class _ContactsListState extends State<ContactsList> {
           autofocus: false,
           controller: _txtSearch,
           onEditingComplete: () => setState(() {
-              searchText = _txtSearch.text;
-            }),
+            searchText = _txtSearch.text;
+          }),
           decoration: const InputDecoration(
             prefixIcon: Icon(Icons.search),
           ),
@@ -141,15 +142,29 @@ class _ContactsListState extends State<ContactsList> {
           if (isUpdate) {
             if (await _handleUpdate()) {}
           } else {
-            if (await _handleDelete(e.id)) {
-              // ignore: use_build_context_synchronously
-              ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Deleted person $deleteName')));
-            } else {
-              // ignore: use_build_context_synchronously
-              ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Cannot delete person $deleteName')));
-            }
+            await _handleDelete(e.id).then((value) {
+              value
+                  ? ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Row(
+                      children: [
+                        const Icon(
+                          Icons.done_rounded,
+                          color: Colors.green,
+                        ),
+                        Text('Deleted person $deleteName'),
+                      ],
+                    )))
+                  : ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Row(
+                      children: [
+                        const Icon(
+                          Icons.dangerous_outlined,
+                          color: Colors.red,
+                        ),
+                        Text('Cannot delete person $deleteName'),
+                      ],
+                    )));
+            });
           }
         },
         child: ListTile(
@@ -158,14 +173,14 @@ class _ContactsListState extends State<ContactsList> {
             subtitle: Text(e.contactPhone)));
   }
 
-  Future<bool> _handleDelete(int id) async {
-    bool deleted = await DBRepository.instance.deleteContact(id);
-    if (deleted) {
-      _contacts.removeWhere((e) => e.id == id);
-      setState(() {});
-    }
-    return deleted;
-  }
+  Future<bool> _handleDelete(int id) async =>
+      await DBRepository.instance.deleteContact(id).then((value) {
+        _contacts.removeWhere((e) => e.id == id);
+        _refreshState();
+        return value;
+      }).catchError((err) async {
+        return false;
+      });
 
   Future<bool> _handleUpdate() async {
     return true;
