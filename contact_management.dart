@@ -16,6 +16,13 @@ class _ContactManagementState extends State<ContactManagement> {
   bool isError = false;
 
   @override
+  void dispose() {
+    _txtContactName.dispose();
+    _txtContactPhone.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -51,15 +58,12 @@ class _ContactManagementState extends State<ContactManagement> {
                 backgroundColor: MaterialStatePropertyAll<Color>(Colors.indigo),
               ),
               onPressed: () async {
-                final db = DBRepository.instance;
-                final id = await db.insert(
-                    model: Contact(
-                        id: 0,
-                        contactName: _txtContactName.text,
-                        contactPhone: _txtContactPhone.text));
+                int id = await _addContact();
                 if (id != 0) {
-                  if (!context.mounted) return;
-                  addContactSuccess(context);
+                  _txtContactName.clear();
+                  _txtContactPhone.clear();
+                  Navigator.of(context).popAndPushNamed('/');
+                  isError = false;
                 } else {
                   setState(() {
                     errorText = "Wrong";
@@ -83,11 +87,12 @@ class _ContactManagementState extends State<ContactManagement> {
     );
   }
 
-  void addContactSuccess(BuildContext context) {
-    _txtContactName.clear();
-    _txtContactPhone.clear();
-    Navigator.of(context).popAndPushNamed('/');
-    // Navigator.pushNamed(context, '/');
-    isError = false;
+  Future<int> _addContact() async {
+    final db = DBRepository.instance;
+    return await db.insert(
+        model: Contact(
+            id: 0,
+            contactName: _txtContactName.text,
+            contactPhone: _txtContactPhone.text));
   }
 }
