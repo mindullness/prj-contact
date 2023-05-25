@@ -32,6 +32,7 @@ class _ContactManagementState extends State<ContactManagement> {
               child: Text(errorText),
             ),
             TextField(
+              autofocus: true,
               controller: _txtContactName,
               decoration: const InputDecoration(hintText: 'Enter name...'),
             ),
@@ -57,6 +58,7 @@ class _ContactManagementState extends State<ContactManagement> {
                         contactName: _txtContactName.text,
                         contactPhone: _txtContactPhone.text));
                 if (id != 0) {
+                  if (!context.mounted) return;
                   addContactSuccess(context);
                 } else {
                   setState(() {

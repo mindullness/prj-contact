@@ -12,7 +12,7 @@ class ContactHome extends StatefulWidget {
 }
 
 class _ContactHomeState extends State<ContactHome> {
-  final TextEditingController _txtSearch = TextEditingController();
+  late TextEditingController _txtSearch = TextEditingController();
   String searchText = '';
   List<Contact> _contacts = [];
 
@@ -32,6 +32,7 @@ class _ContactHomeState extends State<ContactHome> {
   void initState() {
     initDb();
     refreshState();
+    _txtSearch = TextEditingController(text: searchText);
     super.initState();
   }
 
@@ -64,12 +65,16 @@ class _ContactHomeState extends State<ContactHome> {
             ),
           ),
           Expanded(
-            child: ListView(
-              children: getListView(searchText),
-            ),
+            child: _showContact(),
           ),
         ]),
       ),
+    );
+  }
+
+  _showContact() {
+    return ListView(
+      children: getListView(searchText),
     );
   }
 
