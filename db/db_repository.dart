@@ -12,10 +12,12 @@ class DBRepository {
 
   Future<Database> get getDb async {
     // _database!.execute("delete from ${AppConst.tableName}");
-    if (_database != null) return _database!;
+    // if (_database != null) return _database!;
 
-    _database = await _initDB('contact.db');
-    return _database!;
+    // _database = await _initDB('contact.db');
+    // return _database!;
+    
+    return _database ??= await _initDB('contact.db');
   }
 
   Future<Database> _initDB(String filePath) async {
